@@ -1,3 +1,5 @@
+// File: src/index.js
+
 const core = require('@actions/core');
 const github = require('@actions/github');
 const https = require('https');
@@ -40,25 +42,25 @@ function postJiraComment({ url, issueKey, message, auth }) {
     headers: {
       'Authorization': `Basic ${auth}`,
       'Content-Type': 'application/json',
-      'Content-Length': data.length
+      'Content-Length': Buffer.byteLength(data)
     }
   };
 
-  const request = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
+  const req = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
     let responseData = '';
     res.on('data', chunk => responseData += chunk);
     res.on('end', () => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        console.log(`Successfully commented on ${issueKey}`);
+        console.log(`✅ Successfully commented on ${issueKey}`);
       } else {
-        core.setFailed(`Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData}`);
+        core.setFailed(`❌ Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData}`);
       }
     });
   });
 
-  request.on('error', err => core.setFailed(`Request error: ${err.message}`));
-  request.write(data);
-  request.end();
+  req.on('error', err => core.setFailed(`Request error: ${err.message}`));
+  req.write(data);
+  req.end();
 }
 
 async function run() {
@@ -69,6 +71,7 @@ async function run() {
     const successText = core.getInput('success');
     const failedText = core.getInput('failed');
     const skipLabel = core.getInput('label');
+    const status = core.getInput('status');
 
     const branchName = github.context.ref.replace('refs/heads/', '');
     const issueKey = extractIssueKey(branchName);
@@ -87,7 +90,7 @@ async function run() {
 
     const auth = Buffer.from(`${email}:${token}`).toString('base64');
 
-    if (core.getInput('status') === 'success') {
+    if (status === 'success') {
       postJiraComment({ url, issueKey, message: successText, auth });
     } else {
       postJiraComment({ url, issueKey, message: failedText, auth });
