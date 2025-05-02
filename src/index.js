@@ -46,7 +46,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
       'Content-Length': Buffer.byteLength(data)
     }
   };
-
+  console.log('Data REQUEST:', data);
   const req = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
     let responseData = '';
     res.on('data', chunk => responseData += chunk);
