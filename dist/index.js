@@ -31826,6 +31826,8 @@ module.exports = parseParams
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
+// File: src/index.js
+
 const core = __nccwpck_require__(2572);
 const github = __nccwpck_require__(5100);
 const https = __nccwpck_require__(5692);
@@ -31839,25 +31841,21 @@ function shouldSkip(labels, skipLabel) {
   return labels.some(label => label.name === skipLabel);
 }
 
-function escapeUnicode(str) {
-  return str.replace(/[^\0-~]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
-}
-
 function postJiraComment({ url, issueKey, message, auth }) {
   const data = JSON.stringify({
     body: {
-      type: "doc",
+      type: 'doc',
       version: 1,
       content: [
         {
-          type: "paragraph",
+          type: 'paragraph',
           content: [
             {
-              type: "text",
-              text: escapeUnicode(message),
+              type: 'text',
+              text: message,
               marks: [
                 {
-                  type: "strong"
+                  type: 'strong'
                 }
               ]
             }
@@ -31872,25 +31870,27 @@ function postJiraComment({ url, issueKey, message, auth }) {
     headers: {
       'Authorization': `Basic ${auth}`,
       'Content-Type': 'application/json',
-      'Content-Length': data.length
+      'Accept': 'application/json',
+      'Content-Length': Buffer.byteLength(data, 'utf8')
     }
   };
 
-  const request = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
+  const req = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
     let responseData = '';
     res.on('data', chunk => responseData += chunk);
     res.on('end', () => {
+      console.log('Raw Jira Response:', responseData);
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        console.log(`Successfully commented on ${issueKey}`);
+        console.log(`✅ Successfully commented on ${issueKey}`);
       } else {
-        core.setFailed(`Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData}`);
+        core.setFailed(`❌ Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData} for DATA ${data}`);
       }
     });
   });
 
-  request.on('error', err => core.setFailed(`Request error: ${err.message}`));
-  request.write(data);
-  request.end();
+  req.on('error', err => core.setFailed(`Request error: ${err.message}`));
+  req.write(data);
+  req.end();
 }
 
 async function run() {
@@ -31901,6 +31901,7 @@ async function run() {
     const successText = core.getInput('success');
     const failedText = core.getInput('failed');
     const skipLabel = core.getInput('label');
+    const status = core.getInput('status');
 
     const branchName = github.context.ref.replace('refs/heads/', '');
     const issueKey = extractIssueKey(branchName);
@@ -31919,7 +31920,7 @@ async function run() {
 
     const auth = Buffer.from(`${email}:${token}`).toString('base64');
 
-    if (core.getInput('status') === 'success') {
+    if (status === 'success') {
       postJiraComment({ url, issueKey, message: successText, auth });
     } else {
       postJiraComment({ url, issueKey, message: failedText, auth });
