@@ -16,18 +16,18 @@ function shouldSkip(labels, skipLabel) {
 function postJiraComment({ url, issueKey, message, auth }) {
   const data = JSON.stringify({
     body: {
-      type: "doc",
+      type: 'doc',
       version: 1,
       content: [
         {
-          type: "paragraph",
+          type: 'paragraph',
           content: [
             {
-              type: "text",
+              type: 'text',
               text: message,
               marks: [
                 {
-                  type: "strong"
+                  type: 'strong'
                 }
               ]
             }
@@ -42,6 +42,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
     headers: {
       'Authorization': `Basic ${auth}`,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'Content-Length': Buffer.byteLength(data)
     }
   };
@@ -50,6 +51,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
     let responseData = '';
     res.on('data', chunk => responseData += chunk);
     res.on('end', () => {
+      console.log('Raw Jira Response:', responseData);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         console.log(`✅ Successfully commented on ${issueKey}`);
       } else {
