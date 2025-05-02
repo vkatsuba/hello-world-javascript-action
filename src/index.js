@@ -43,7 +43,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
       'Authorization': `Basic ${auth}`,
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Content-Length': Buffer.byteLength(data)
+      'Content-Length': Buffer.byteLength(data, 'utf8')
     }
   };
 
