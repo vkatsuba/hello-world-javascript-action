@@ -11,7 +11,7 @@ jobs:
           email: ${{ secrets.JIRA_EMAIL }}
           token: ${{ secrets.JIRA_API_TOKEN }}
           url: ${{ secrets.JIRA_BASE_URL }}
-          success: "✅ Build is success!"
-          failed: "❌ Build is failed!"
+          success: "Build is success!"
+          failed: "Build is failed!"
           label: "skip-jira"
           status: ${{ job.status }}
