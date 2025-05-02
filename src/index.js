@@ -46,7 +46,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
       'Content-Length': Buffer.byteLength(data)
     }
   };
-  console.log('Data REQUEST:', data);
+
   const req = https.request(`${url}/rest/api/3/issue/${issueKey}/comment`, options, res => {
     let responseData = '';
     res.on('data', chunk => responseData += chunk);
@@ -55,7 +55,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         console.log(`✅ Successfully commented on ${issueKey}`);
       } else {
-        core.setFailed(`❌ Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData}`);
+        core.setFailed(`❌ Failed to comment on issue ${issueKey}: ${res.statusCode} ${responseData} for DATA ${data}`);
       }
     });
   });
