@@ -1,13 +1,29 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Jira CI Integration'
+description: 'Posts Jira comment on build success or failure, with optional label-based skip'
+
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  email:
+    description: 'Jira email (for auth)'
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+  token:
+    description: 'Jira API token (for auth)'
+    required: true
+  url:
+    description: 'Base URL of Jira (e.g. https://yourcompany.atlassian.net)'
+    required: true
+  success:
+    description: 'Text to post on successful build'
+    required: true
+  failed:
+    description: 'Text to post on failed build'
+    required: true
+  label:
+    description: 'Label to skip this step if it is present in PR'
+    required: false
+  status:
+    description: 'CI job status: success, failure, etc.'
+    required: true
+
 runs:
   using: 'node20'
   main: 'dist/index.js'
