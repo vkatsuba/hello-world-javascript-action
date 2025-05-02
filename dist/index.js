@@ -31839,6 +31839,10 @@ function shouldSkip(labels, skipLabel) {
   return labels.some(label => label.name === skipLabel);
 }
 
+function escapeUnicode(str) {
+  return str.replace(/[^\0-~]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+}
+
 function postJiraComment({ url, issueKey, message, auth }) {
   const data = JSON.stringify({
     body: {
@@ -31850,7 +31854,7 @@ function postJiraComment({ url, issueKey, message, auth }) {
           content: [
             {
               type: "text",
-              text: message,
+              text: escapeUnicode(message),
               marks: [
                 {
                   type: "strong"
